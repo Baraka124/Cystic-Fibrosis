@@ -3363,17 +3363,16 @@ async function executeJsonImport() {
             showNotification(`✓ Added ${name}`, 'success');
         }
         
-        // Rebuild indexes and recalc stats
+        // ---------- FIXED: Rebuild indexes and recalc stats ----------
         buildSearchIndex();
-        calculateMasterStats();
+        calculateMasterStats();  // ✅ REPLACED renderMasterStatsUI() with this
         
         // Refresh views
         STATE.view.filteredVariants = [...STATE.variants];
         STATE.view.dataViewMode = 'all';
         STATE.view.activeFilter = 'all';
         
-        renderMasterStatsUI();
-        applyFilterChain();
+        applyFilterChain();  // ✅ This handles all view updates
         
         clearImportForm();
         setTimeout(closeImportModal, 1500);
