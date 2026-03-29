@@ -31,9 +31,9 @@
             --surface-alt: #0a1220;
             --border: rgba(99,140,210,0.13);
             --border-strong: rgba(99,140,210,0.25);
-            --text-primary: #dce8f8;
-            --text-secondary: #7a9bc8;
-            --text-tertiary: #4a6a99;
+            --text-primary: #f0f6ff;
+            --text-secondary: #9ab8e0;
+            --text-tertiary: #5a7aaa;
             --text-inverse: #0d1526;
 
             /* Brand — electric blue */
@@ -69,7 +69,10 @@
             --class-v-border: rgba(192,132,252,0.22);
             --class-v-text: #d8b4fe;
 
-            /* Semantic */
+            --class-vi: #f472b6;
+            --class-vi-bg: rgba(244,114,182,0.08);
+            --class-vi-border: rgba(244,114,182,0.22);
+            --class-vi-text: #f9a8d4;
             --success: #34d399;
             --success-bg: rgba(52,211,153,0.08);
             --warning: #fbbf24;
@@ -343,41 +346,60 @@
            ============================================================ */
         .dev-watermark {
             position: fixed;
-            bottom: 24px;
+            bottom: 0;
             left: 50%;
             transform: translateX(-50%);
             z-index: 9000;
             pointer-events: none;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 8px;
-            padding: 6px 14px 6px 10px;
-            background: rgba(4, 8, 15, 0.75);
-            border: 1px solid rgba(251,191,36,0.25);
-            border-radius: 20px;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            gap: 4px;
+            padding: 10px 28px 12px;
+            background: linear-gradient(135deg, rgba(4,8,15,0.92) 0%, rgba(10,18,35,0.92) 100%);
+            border: 1px solid rgba(251,191,36,0.35);
+            border-bottom: none;
+            border-radius: 14px 14px 0 0;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 -4px 24px rgba(251,191,36,0.08), inset 0 1px 0 rgba(251,191,36,0.12);
+            min-width: 420px;
+        }
+
+        .dev-watermark::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(251,191,36,0.5) 30%, rgba(251,191,36,0.5) 70%, transparent);
+        }
+
+        .dev-top-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .dev-dot {
-            width: 6px;
-            height: 6px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background: #fbbf24;
             animation: devBlink 1.8s ease-in-out infinite;
             flex-shrink: 0;
+            box-shadow: 0 0 6px rgba(251,191,36,0.6);
         }
 
         @keyframes devBlink {
-            0%, 100% { opacity: 1; box-shadow: 0 0 4px rgba(251,191,36,0.6); }
-            50% { opacity: 0.35; box-shadow: none; }
+            0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(251,191,36,0.7); }
+            50% { opacity: 0.4; box-shadow: none; }
         }
 
         .dev-text {
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.12em;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.18em;
             text-transform: uppercase;
             color: #fbbf24;
             white-space: nowrap;
@@ -386,8 +408,17 @@
         .dev-version {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 9px;
-            color: rgba(251,191,36,0.4);
-            margin-left: 2px;
+            color: rgba(251,191,36,0.45);
+            margin-left: 4px;
+            letter-spacing: 0.08em;
+        }
+
+        .dev-sub {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 10px;
+            color: rgba(251,191,36,0.5);
+            letter-spacing: 0.05em;
+            white-space: nowrap;
         }
 
         /* ============================================================
@@ -557,35 +588,53 @@
 
         .sidebar-toggle {
             position: absolute;
-            top: 12px;
-            right: -16px;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: #0d1a30;
-            border: 1px solid rgba(41,121,255,0.35);
+            top: 50%;
+            right: -18px;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 56px;
+            border-radius: 0 10px 10px 0;
+            background: linear-gradient(180deg, #1a3a6e 0%, #0d2150 50%, #1a3a6e 100%);
+            border: 1px solid rgba(41,121,255,0.55);
+            border-left: none;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 50;
-            box-shadow: 0 0 12px rgba(41,121,255,0.15), var(--shadow-md);
+            z-index: 200;
+            box-shadow: 4px 0 16px rgba(41,121,255,0.35), 0 0 0 1px rgba(41,121,255,0.15);
             transition: var(--transition);
+            overflow: visible;
+        }
+
+        .sidebar-toggle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(180deg, transparent, rgba(41,121,255,0.7), transparent);
+            border-radius: 2px;
         }
 
         .sidebar-toggle:hover {
-            background: var(--brand);
-            border-color: var(--brand);
-            box-shadow: var(--glow-brand);
+            background: linear-gradient(180deg, #2979ff 0%, #1a5fd9 50%, #2979ff 100%);
+            border-color: #60a5fa;
+            box-shadow: 6px 0 24px rgba(41,121,255,0.6), 0 0 0 1px rgba(96,165,250,0.3);
+            width: 22px;
         }
 
         .sidebar-toggle i {
-            font-size: 10px;
-            color: #60a5fa;
+            font-size: 8px;
+            color: #93c5fd;
             transition: var(--transition);
+            position: relative;
+            z-index: 1;
         }
 
-        .sidebar-toggle:hover i { color: white; }
+        .sidebar-toggle:hover i { color: #ffffff; }
 
         .sidebar-collapsed .sidebar-toggle i {
             transform: rotate(180deg);
@@ -751,6 +800,7 @@
         .class-dot.ciii { background: var(--class-iii-bg); color: var(--class-iii-text); border-color: var(--class-iii-border); }
         .class-dot.civ  { background: var(--class-iv-bg);  color: var(--class-iv-text);  border-color: var(--class-iv-border); }
         .class-dot.cv   { background: var(--class-v-bg);   color: var(--class-v-text);   border-color: var(--class-v-border); }
+        .class-dot.cvi  { background: var(--class-vi-bg);  color: var(--class-vi-text);  border-color: var(--class-vi-border); }
         .class-dot.call { background: var(--surface-alt);  color: var(--text-secondary); border-color: var(--border); }
 
         .class-dot { opacity: 1; }
@@ -879,7 +929,7 @@
         .row-class-badge.cii  { background: var(--class-ii-bg);  color: var(--class-ii-text);  border: 1px solid var(--class-ii-border); }
         .row-class-badge.ciii { background: var(--class-iii-bg); color: var(--class-iii-text); border: 1px solid var(--class-iii-border); }
         .row-class-badge.civ  { background: var(--class-iv-bg);  color: var(--class-iv-text);  border: 1px solid var(--class-iv-border); }
-        .row-class-badge.cv   { background: var(--class-v-bg);   color: var(--class-v-text);   border: 1px solid var(--class-v-border); }
+        .row-class-badge.cvi  { background: var(--class-vi-bg);  color: var(--class-vi-text);  border: 1px solid var(--class-vi-border); }
 
         .row-protein {
             font-size: 11px;
@@ -2129,9 +2179,12 @@
      DEV WATERMARK
      ================================================================ -->
 <div class="dev-watermark">
-    <div class="dev-dot"></div>
-    <span class="dev-text">Sistema en Desarrollo</span>
-    <span class="dev-version">v3.0-β</span>
+    <div class="dev-top-row">
+        <div class="dev-dot"></div>
+        <span class="dev-text">Sistema Actualmente en Desarrollo</span>
+        <span class="dev-version">v3.0-β</span>
+    </div>
+    <div class="dev-sub">Esta plataforma está en fase de desarrollo activo — funcionalidades pueden cambiar sin previo aviso</div>
 </div>
 
 <!-- ================================================================
@@ -2247,6 +2300,7 @@
             <button class="class-dot ciii" id="cdot-III" onclick="setClassFilter('III')">III</button>
             <button class="class-dot civ"  id="cdot-IV"  onclick="setClassFilter('IV')">IV</button>
             <button class="class-dot cv"   id="cdot-V"   onclick="setClassFilter('V')">V</button>
+            <button class="class-dot cvi"  id="cdot-VI"  onclick="setClassFilter('VI')">VI</button>
         </div>
 
         <!-- List meta -->
@@ -3044,7 +3098,7 @@ function filterVariants(filter) {
 
 function setClassFilter(cls) {
     STATE.view.classFilter = cls;
-    ['all','I','II','III','IV','V'].forEach(c => {
+    ['all','I','II','III','IV','V','VI'].forEach(c => {
         const id = c === 'all' ? 'cdot-all' : `cdot-${c}`;
         const el = document.getElementById(id);
         if (el) el.classList.toggle('active', c === cls);
