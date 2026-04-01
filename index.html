@@ -4028,7 +4028,7 @@ async function exportSearchPDF() {
                 document.head.appendChild(s);
             });
         } catch(e) {
-            showNotification('PDF library failed to load — check connection', 'error');
+            showNotification('PDF library failed to load - check connection', 'error');
             return;
         }
     }
@@ -4044,18 +4044,18 @@ async function exportSearchPDF() {
     const fmt  = n => Number(n).toLocaleString('en-GB');
     const dateStr = now.toLocaleDateString('en-GB', {day:'2-digit', month:'long', year:'numeric'});
     const hospital = (si.hospital && si.hospital !== 'Anonymous') ? si.hospital : null;
-    const reportId = 'ΔHEL-' + now.toISOString().replace(/[-:T]/g,'').slice(0,12);
+    const reportId = 'NHEL-' + now.toISOString().replace(/[-:T]/g,'').slice(0,12);
 
     // ---- Institutional branding ----
     const BRAND = {
         group:      'neumACt',
-        department: 'Servicio de Neumología',
+        department: 'Servicio de Neumologia',
         hospital:   'CHUAC',
-        full:       'neumACt  ·  Servicio de Neumología  ·  CHUAC',
-        hospitalFull: 'Complejo Hospitalario Universitario de A Coruña (CHUAC)',
+        full:       'neumACt  .  Servicio de Neumologia  .  CHUAC',
+        hospitalFull: 'Complejo Hospitalario Universitario de A Coruna (CHUAC)',
     };
 
-    // ---- Color palette — scientific, minimal ----
+    // ---- Color palette - scientific, minimal ----
     const C = {
         black:      [10, 10, 10],
         dark:       [30, 30, 30],
@@ -4092,6 +4092,8 @@ async function exportSearchPDF() {
         doc.setFont('courier', 'normal');
         doc.setTextColor(...(color || C.dark));
         doc.text(String(text), x, yPos);
+        // Always reset to helvetica after monospace — prevents bleed into next element
+        doc.setFont('helvetica', 'normal');
     };
 
     // Check for page break and add new page if needed
@@ -4100,7 +4102,7 @@ async function exportSearchPDF() {
             doc.addPage();
             // Subtle running header on continuation pages
             setFont(7, 'normal', C.verylight);
-            doc.text('neumACt · Servicio de Neumología · CHUAC  —  Δ Helix Search Intelligence Report', M, 8);
+            doc.text('neumACt . Servicio de Neumologia . CHUAC  -  Search Intelligence Report', M, 8);
             doc.text(reportId, W-M, 8, {align:'right'});
             rule(10, M, W-M, 0.2, C.rule);
             y = 18;
@@ -4132,7 +4134,7 @@ async function exportSearchPDF() {
         rule(y - 3.5, M, W-M, 0.35, C.rule);
         cols.forEach(col => {
             setFont(7.5, 'bold', C.mid);
-            // Small caps simulation — uppercase
+            // Small caps simulation - uppercase
             doc.text(col.label.toUpperCase(), col.x, y, col.align ? {align: col.align} : undefined);
         });
         y += 2.5;
@@ -4170,7 +4172,7 @@ async function exportSearchPDF() {
     // ================================================================
     y = 42;
 
-    // Top rule — double weight
+    // Top rule - double weight
     rule(y, M, W-M, 1, C.accent);
     y += 1.5;
     rule(y, M, W-M, 0.3, C.accent);
@@ -4178,27 +4180,28 @@ async function exportSearchPDF() {
 
     txt('Search Intelligence Report', M, y, 18, 'bold', C.accent);
     y += 8;
-    txt('Supplementary Data — CFTR Variant Search Activity Analysis', M, y, 11, 'normal', C.mid);
+    txt('Supplementary Data - CFTR Variant Search Activity Analysis', M, y, 11, 'normal', C.mid);
     y += 14;
     // Institutional branding block
     rule(y, M, W-M, 0.25, C.rule); y += 5;
     txt(BRAND.group, M, y, 11, 'bold', C.accent);
     y += 5.5;
-    txt('Servicio de Neumología  ·  Complejo Hospitalario Universitario de A Coruña (CHUAC)', M, y, 8.5, 'normal', C.mid);
+    txt('Servicio de Neumologia  .  Complejo Hospitalario Universitario de A Coruna (CHUAC)', M, y, 8.5, 'normal', C.mid);
     y += 5;
     rule(y, M, W-M, 0.25, C.rule); y += 5;
+    doc.setFont('helvetica', 'normal'); // reset after brand block
 
     rule(y, M, W-M, 0.3, C.rule);
     y += 8;
 
-    // Metadata block — like a journal paper
+    // Metadata block - like a journal paper
     const metaRows = [
         ['Research group', BRAND.group],
         ['Department',     BRAND.department],
         ['Hospital',       BRAND.hospitalFull],
-        ['Platform',       'Δ Helix CFTR Precision Medicine Platform'],
+        ['Platform',       'Delta Helix CFTR Precision Medicine Platform'],
         ['Report ID',      reportId],
-        ['Generated',      dateStr + '  ·  ' + now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'})],
+        ['Generated',      dateStr + '  .  ' + now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'})],
         ['Clinician site', hospital || 'Not specified'],
         ['Coverage',       rate.total > 0 ? `${rate.hitRate}% query resolution rate over ${fmt(rate.total)} searches` : 'No searches recorded'],
     ];
@@ -4218,15 +4221,18 @@ async function exportSearchPDF() {
     const hitRate = rate.total > 0 ? rate.hitRate : 0;
     const abstract =
         `This report summarises CFTR variant search activity recorded by the ${BRAND.group} research group ` +
-        `(${BRAND.department}, ${BRAND.hospitalFull}) on the Δ Helix precision medicine platform. ` +
+        `(${BRAND.department}, ${BRAND.hospitalFull}) on the Delta Helix precision medicine platform. ` +
         `A total of ${fmt(rate.total)} search events were analysed, of which ${fmt(rate.hits)} (${hitRate}%) resolved ` +
         `to a known variant entry across the three primary nomenclature fields (legacy name, HGVS protein notation, cDNA notation). ` +
         `${fmt(si.globalMisses.size)} unique query terms returned no result, representing potential gaps in database coverage ` +
         `that may warrant targeted literature review or variant curation.` +
         (hospital ? ` Session attributed to: ${hospital}.` : '');
 
+    // Explicitly reset to helvetica before abstract — previous courier calls can bleed
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...C.dark);
     const abstractLines = doc.splitTextToSize(abstract, TW);
-    setFont(9, 'normal', C.dark);
     abstractLines.forEach(line => { doc.text(line, M, y); y += 5; });
 
     y += 6;
@@ -4236,20 +4242,20 @@ async function exportSearchPDF() {
 
     // Confidential footer on title page
     txt(BRAND.full, W/2, 280, 7.5, 'normal', C.mid, 'center');
-    txt('CONFIDENTIAL — For authorised clinical and research personnel only', W/2, 286, 7, 'italic', C.light, 'center');
+    txt('CONFIDENTIAL - For authorised clinical and research personnel only', W/2, 286, 7, 'italic', C.light, 'center');
 
     // ================================================================
-    // PAGE 2 ONWARDS — Content
+    // PAGE 2 ONWARDS - Content
     // ================================================================
     doc.addPage();
     setFont(7, 'normal', C.verylight);
-    doc.text(BRAND.full + '  —  Search Intelligence Report', M, 8);
+    doc.text('neumACt  .  Servicio de Neumologia  .  CHUAC  -  Search Intelligence Report', M, 8);
     doc.text(reportId, W-M, 8, {align:'right'});
     rule(10, M, W-M, 0.2, C.rule);
     y = 22;
 
     // ================================================================
-    // SECTION 1 — Activity summary
+    // SECTION 1 - Activity summary
     // ================================================================
     sectionHeader('Activity Summary');
     tableCaption('Key performance indicators for the recorded search period.');
@@ -4262,7 +4268,7 @@ async function exportSearchPDF() {
     tableHeader(kpiCols);
 
     const kpiRows = [
-        ['Research group',                BRAND.group,                 BRAND.department + '  ·  ' + BRAND.hospital],
+        ['Research group',                BRAND.group,                 BRAND.department + '  .  ' + BRAND.hospital],
         ['Total search events',           fmt(rate.total),             'Unique settled queries after debounce'],
         ['Queries with result (hits)',     fmt(rate.hits),              'Matched in legacy, protein, or cDNA field'],
         ['Queries without result (misses)',fmt(rate.misses),            'Logged to research gap queue'],
@@ -4281,7 +4287,7 @@ async function exportSearchPDF() {
     tableFooter();
 
     // ================================================================
-    // SECTION 2 — Variant search frequency
+    // SECTION 2 - Variant search frequency
     // ================================================================
     sectionHeader('Variant Search Frequency');
     tableCaption('Queries resolved to a known CFTR variant, with clinical annotation. Sorted by search frequency descending.');
@@ -4301,12 +4307,12 @@ async function exportSearchPDF() {
         needsPage(7);
         const v = STATE.variants.find(vv => vv.legacy_name.toLowerCase() === h.query.toLowerCase());
         const etiLabel = v ? (v.eti_prediction === 'responsive' ? 'Responsive'
-            : v.eti_prediction === 'non_responsive' ? 'Non-responsive' : 'Unknown') : '—';
-        const valStr = v ? (v.validation_count > 0 ? v.validation_count + '' : '0') : '—';
+            : v.eti_prediction === 'non_responsive' ? 'Non-responsive' : 'Unknown') : '-';
+        const valStr = v ? (v.validation_count > 0 ? v.validation_count + '' : '0') : '-';
         tableRow([
             {text: String(i+1).padStart(2,'0'), x: M, size:8, color: C.light},
             {text: h.query, x: M+10, mono: true, size: 8.5},
-            {text: v ? ('Class ' + (v.cftr_class||'—')) : '—', x: M+82,  size:8, color: C.mid},
+            {text: v ? ('Class ' + (v.cftr_class||'-')) : '-', x: M+82,  size:8, color: C.mid},
             {text: etiLabel,  x: M+100, size:8, color: C.mid},
             {text: valStr,    x: M+132, size:8, color: C.mid},
             {text: fmt(h.count), x: W-M, size:8.5, bold:true, align:'right'},
@@ -4315,7 +4321,7 @@ async function exportSearchPDF() {
     tableFooter('ETI prediction: based on variant class rules and available evidence. Validation count reflects clinician-confirmed records.');
 
     // ================================================================
-    // SECTION 3 — Unresolved query analysis
+    // SECTION 3 - Unresolved query analysis
     // ================================================================
     const topMisses = getTopMisses(25);
     if (topMisses.length) {
@@ -4346,7 +4352,7 @@ async function exportSearchPDF() {
     }
 
     // ================================================================
-    // SECTION 4 — Geographic distribution
+    // SECTION 4 - Geographic distribution
     // ================================================================
     const loc = si.locationCache;
     if (loc && loc.city) {
@@ -4356,9 +4362,9 @@ async function exportSearchPDF() {
             {label:'Field', x:M}, {label:'Value', x:M+50}
         ]);
         const geoRows = [
-            ['City',    loc.city    || '—'],
-            ['Region',  loc.region  || '—'],
-            ['Country', loc.country || '—'],
+            ['City',    loc.city    || '-'],
+            ['Region',  loc.region  || '-'],
+            ['Country', loc.country || '-'],
             ['Source',  'ipapi.co (IP geolocation, city-level precision)'],
             ['Note',    'VPN or institutional proxy may affect accuracy'],
         ];
@@ -4372,7 +4378,7 @@ async function exportSearchPDF() {
     }
 
     // ================================================================
-    // SECTION 5 — Complete search log
+    // SECTION 5 - Complete search log
     // ================================================================
     sectionHeader('Complete Search Log');
 
@@ -4405,14 +4411,14 @@ async function exportSearchPDF() {
                 {text:qd,                    x:M,     mono:true, size:8},
                 {text:r.is_hit?'HIT':'MISS', x:M+68,  size:8, bold:true,
                     color: r.is_hit ? [20,100,40] : [150,30,30]},
-                {text:fLabel[r.matched_field]||'—', x:M+84,  size:8, color:C.mid},
-                {text:(r.city||'—').slice(0,14),    x:M+120, size:7.5, color:C.mid},
+                {text:fLabel[r.matched_field]||'-', x:M+84,  size:8, color:C.mid},
+                {text:(r.city||'-').slice(0,14),    x:M+120, size:7.5, color:C.mid},
                 {text:dtStr,                 x:W-M,   size:7.5, color:C.mid, align:'right'},
             ], i);
         });
         tableFooter('HIT = query resolved to a known variant. MISS = no matching record found in database.');
     } catch(e) {
-        txt('Search log unavailable — database connection required.', M, y, 9, 'italic', C.light);
+        txt('Search log unavailable - database connection required.', M, y, 9, 'italic', C.light);
         y += 8;
     }
 
@@ -4431,7 +4437,7 @@ async function exportSearchPDF() {
 
     const fname = 'neumACt-search-supplement-' + now.toISOString().split('T')[0] + '.pdf';
     doc.save(fname);
-    showNotification(`Report downloaded — ${pageCount} page${pageCount>1?'s':''}`, 'success');
+    showNotification(`Report downloaded - ${pageCount} page${pageCount>1?'s':''}`, 'success');
 }
 
 
@@ -4441,7 +4447,7 @@ function exportSearchReport() {
     const misses = getTopMisses(20);
     const rate   = getSearchHitRate();
     const lines  = [
-        'ΔHELIX — SEARCH INTELLIGENCE REPORT',
+        'neumACt - SEARCH INTELLIGENCE REPORT',
         'Generated: ' + new Date().toLocaleString('en-GB'),
         '',
         '=== SUMMARY ===',
