@@ -5684,49 +5684,31 @@
         .cp-enter-btn:active  { transform: scale(0.97); }
         .cp-enter-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
         .cp-disclaimer {
-            width: 100%; max-width: 480px;
+            width: 100%; max-width: 460px;
+            background: rgba(175,115,12,0.055);
             border: 1px solid rgba(210,155,30,0.16);
             border-radius: 8px;
-            overflow: hidden;
+            padding: 12px 16px;
             animation: cpRise 1s 0.60s cubic-bezier(0.16,1,0.3,1) both;
         }
-        .cp-disc-toggle {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 16px; cursor: pointer;
-            background: rgba(175,115,12,0.06);
-            transition: background 0.22s;
-            user-select: none;
-        }
-        .cp-disc-toggle:hover { background: rgba(175,115,12,0.11); }
         .cp-disc-header {
             display: flex; align-items: center; gap: 7px;
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 9.5px; letter-spacing: 0.13em;
+            font-size: 9px; letter-spacing: 0.13em;
             text-transform: uppercase;
-            color: rgba(215,162,48,0.82);
+            color: rgba(215,162,48,0.80);
+            margin-bottom: 7px;
         }
-        .cp-disc-chevron {
-            transition: transform 0.32s cubic-bezier(0.16,1,0.3,1);
-            flex-shrink: 0;
-        }
-        .cp-disc-chevron.open { transform: rotate(180deg); }
-        .cp-disc-body-wrap {
-            max-height: 0; overflow: hidden;
-            transition: max-height 0.38s cubic-bezier(0.16,1,0.3,1);
-            background: rgba(175,115,12,0.04);
-        }
-        .cp-disc-body-wrap.open { max-height: 160px; }
-        .cp-disc-inner { padding: 12px 16px 14px; }
         .cp-disc-body {
             font-family: 'IBM Plex Sans', sans-serif;
-            font-size: 11px; line-height: 1.65;
-            color: rgba(152,182,212,0.62);
-            margin-bottom: 8px;
+            font-size: 11px; line-height: 1.60;
+            color: rgba(148,180,210,0.58);
+            margin-bottom: 7px;
         }
         .cp-disc-email {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 10px; letter-spacing: 0.03em;
-            color: rgba(34,200,216,0.76);
+            color: rgba(34,200,216,0.72);
         }
     </style>
 
@@ -5789,21 +5771,14 @@
         <button class="cp-enter-btn" id="cpEnterBtn">Entrar</button>
 
         <div class="cp-disclaimer">
-            <div class="cp-disc-toggle" id="cpDiscToggle">
-                <div class="cp-disc-header">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(215,162,48,0.82)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    Beta v1.0 &nbsp;·&nbsp; Uso exclusivo profesional clínico
-                </div>
-                <svg class="cp-disc-chevron" id="cpDiscChevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(215,162,48,0.55)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            <div class="cp-disc-header">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(215,162,48,0.80)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Beta v1.0 &nbsp;·&nbsp; Uso exclusivo profesional clínico &nbsp;·&nbsp; Prueba controlada
             </div>
-            <div class="cp-disc-body-wrap" id="cpDiscBody">
-                <div class="cp-disc-inner">
-                    <div class="cp-disc-body">
-                        Herramienta en fase beta destinada exclusivamente a profesionales sanitarios en el marco de una prueba controlada. No sustituye el juicio clínico. Las clasificaciones de variantes deben verificarse antes de informar cualquier decisión asistencial.
-                    </div>
-                    <div class="cp-disc-email">Comentarios &rarr;&nbsp; devops.neumologia@gmail.com</div>
-                </div>
+            <div class="cp-disc-body">
+                Herramienta en fase beta destinada a profesionales sanitarios. No sustituye el juicio clínico ni constituye asesoramiento médico. Las clasificaciones de variantes deben verificarse antes de informar cualquier decisión asistencial.
             </div>
+            <div class="cp-disc-email">Comentarios &rarr;&nbsp; devops.neumologia@gmail.com</div>
         </div>
 
     </div>
@@ -27364,7 +27339,6 @@ async function init() {
     loadAppConfig(); // Item 17: load configurable settings
     attachVariantNameValidation(); // Nomenclature validation on entry form
     await loadVariants();
-    initHospital();
     initAppMode();
     // Fix 3: restore sidebar AFTER DOM is ready
     if (localStorage.getItem('_sidebarCollapsed') === '1') {
@@ -27851,20 +27825,29 @@ function drawCanvas() {
     }
 
     setTimeout(function() {
-        advance('boot');
-        showHospitalGreeting();
+        // Boot is now triggered by cover page Enter button via window.LOADER.start()
+        // Do not auto-start here — cover page gates the sequence
     }, 200);
 
-    var safetyTimer = setTimeout(function() {
-        if (!dismissed) dismiss();
-    }, 12000);
+    var safetyTimer = null;
 
     window.LOADER = { 
         advance: advance, 
         setVariantCount: setVariantCount, 
         setError: setError, 
         dismiss: dismiss,
-        _clearSafety: function() { clearTimeout(safetyTimer); }
+        _clearSafety: function() { clearTimeout(safetyTimer); },
+        start: function() {
+            dismissed = false;
+            screen.style.display = '';
+            screen.classList.remove('fade-out');
+            advance('boot');
+            showHospitalGreeting();
+            if (typeof initHospital === 'function') initHospital();
+            safetyTimer = setTimeout(function() {
+                if (!dismissed) dismiss();
+            }, 12000);
+        }
     };
 })();
 
@@ -27872,25 +27855,18 @@ function drawCanvas() {
 
 // ── COVER PAGE ──────────────────────────────────────────────────
 (function() {
-    var cover   = document.getElementById('coverPage');
-    var btn     = document.getElementById('cpEnterBtn');
-    var toggle  = document.getElementById('cpDiscToggle');
-    var body    = document.getElementById('cpDiscBody');
-    var chevron = document.getElementById('cpDiscChevron');
+    var cover = document.getElementById('coverPage');
+    var btn   = document.getElementById('cpEnterBtn');
     if (!cover || !btn) return;
-
-    if (toggle && body && chevron) {
-        toggle.addEventListener('click', function() {
-            body.classList.toggle('open');
-            chevron.classList.toggle('open');
-        });
-    }
 
     btn.addEventListener('click', function() {
         btn.disabled    = true;
         btn.textContent = 'Cargando\u2026';
         cover.classList.add('cp-fade-out');
-        setTimeout(function() { cover.style.display = 'none'; }, 1000);
+        setTimeout(function() {
+            cover.style.display = 'none';
+            if (window.LOADER && window.LOADER.start) window.LOADER.start();
+        }, 600);
     });
 })();
 
